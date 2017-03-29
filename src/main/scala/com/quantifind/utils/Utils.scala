@@ -2,6 +2,8 @@ package com.quantifind.utils
 
 import java.net.InetAddress
 
+import scala.util.{Failure, Success, Try}
+
 /**
  * Basic utils
  *
@@ -26,4 +28,13 @@ object Utils {
     return kafkaHost
   }
 
+  // Returning T, throwing the exception on failure
+  @annotation.tailrec
+  final def retry[T](n: Int)(fn: => T): T = {
+    Try { fn } match {
+      case Success(x) => x
+      case _ if n > 1 => retry(n - 1)(fn)
+      case Failure(e) => throw e
+    }
+  }
 }
